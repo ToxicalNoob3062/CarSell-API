@@ -23,6 +23,6 @@ export class User {
 
     @AfterRemove()
     logRemove() {
-        console.log(`User was removed was holding an id of ${this.id}!`);
+        console.log(`A User Removal Event Detected!⚡😱`);
     }
 }
