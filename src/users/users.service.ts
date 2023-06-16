@@ -22,12 +22,13 @@ export class UsersService {
     }
     async update(id: number, attrs: Partial<User>) {
         const user = await this.findOne(id);
-        if (!user) throw new Error(`Could not find an user with an id of ${id}!`);
+        if (!user) return user;
         Object.assign(user, attrs);
         return this.repo.save(user);
     }
     async remove(id: number) {
         const user = await this.findOne(id);
-        return user ? this.repo.remove(user) : (() => { throw new Error(`Could not find an user with an id of ${id}!`); })();
+        if (!user) return user;
+        return this.repo.remove(user);
     }
 }
