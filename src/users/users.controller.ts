@@ -10,6 +10,7 @@ import { User } from './user.entity';
 import { Serialize } from 'src/interceptors/serialize.interceptor';
 import { UserDto } from 'src/users/dto/user.dto';
 import { Class } from 'src/custom.types';
+import { Not } from 'typeorm';
 
 
 //pushed our custom interceptor for filtering props on response!
@@ -27,9 +28,18 @@ export class UsersController {
     };
 
     @Post('/signup')
-    async createUser(@Body() { email, password }: CreateUserDto) {
+    async signUp(@Body() { email, password }: CreateUserDto) {
         const user = await this.authService.signUp(email, password);
         return this.httpError(user, BadRequestException, 'Email already in use!😔');
+    };
+
+    @Post('/signin')
+    async signIn(@Body() { email, password }: CreateUserDto) {
+        let [user] = await this.usersService.find(email);
+        if (!user) return this.httpError(user, NotFoundException, `User not found with an email of ${email}`);
+        user = await this.authService.signIn(user, password);
+        if (!user) return this.httpError(user, BadRequestException, 'OOPS! Password was wrong!👎');
+        return user;
     };
 
     @Get('/:id')

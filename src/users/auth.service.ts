@@ -2,6 +2,7 @@ import { promisify } from 'util';
 import { Injectable } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { randomBytes, scrypt as _scrypt } from 'crypto';
+import { User } from './user.entity';
 
 const scrypt = promisify(_scrypt);
 
@@ -9,8 +10,12 @@ const scrypt = promisify(_scrypt);
 export class AuthService {
     constructor(private usersService: UsersService) { }
 
-    signIn() {
-
+    async signIn(user: User, password: string) {
+        const [salt, storedHash] = user.password.split('.');
+        const hash = (await scrypt(password, salt, 32)) as Buffer;
+        const result = `${salt}.${hash.toString("hex")}`;
+        if (result !== storedHash) return user;
+        return null;
     }
 
     async signUp(email: string, password: string) {
