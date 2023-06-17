@@ -11,6 +11,9 @@ export class User {
     @Column()
     password: string;
 
+    //the below methods use typeorm hooks with methods and this will only be executed if we interact with database
+    //creating a database instance.
+
     @AfterInsert()
     logInsert() {
         console.log(`User was created with an id of ${this.id}!`);
