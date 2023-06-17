@@ -13,8 +13,7 @@ export class AuthService {
     async signIn(user: User, password: string) {
         const [salt, storedHash] = user.password.split('.');
         const hash = (await scrypt(password, salt, 32)) as Buffer;
-        const result = `${salt}.${hash.toString("hex")}`;
-        if (result !== storedHash) return user;
+        if (hash.toString('hex') === storedHash) return user;
         return null;
     }
 

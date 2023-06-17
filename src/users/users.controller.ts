@@ -1,6 +1,6 @@
 import {
     Body, Controller, Delete, Get, Param, Patch, Post, Query,
-    NotFoundException, BadRequestException
+    NotFoundException, BadRequestException, Session
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user-dto';
@@ -10,7 +10,6 @@ import { User } from './user.entity';
 import { Serialize } from 'src/interceptors/serialize.interceptor';
 import { UserDto } from 'src/users/dto/user.dto';
 import { Class } from 'src/custom.types';
-import { Not } from 'typeorm';
 
 
 //pushed our custom interceptor for filtering props on response!
@@ -23,24 +22,39 @@ export class UsersController {
     ) { }
 
     //controller utility modified method
-    httpError(user: User, instance: Class, msg: string) {
-        return user ? user : (() => { throw new instance(msg); })();
+    httpError(user: User, exception: Class, msg: string) {
+        return user ? user : (() => { throw new exception(msg); })();
     };
 
+    @Get('/retrieve')
+    async retrieveUp(@Session() session: any) {
+        const user = await this.usersService.findOne(session.userId);
+        return this.httpError(user, NotFoundException, `Session not found!`);
+    }
+
     @Post('/signup')
-    async signUp(@Body() { email, password }: CreateUserDto) {
+    async signUp(@Body() { email, password }: CreateUserDto, @Session() session: any) {
         const user = await this.authService.signUp(email, password);
+        session.userId = user.id;
         return this.httpError(user, BadRequestException, 'Email already in use!😔');
     };
 
     @Post('/signin')
-    async signIn(@Body() { email, password }: CreateUserDto) {
+    async signIn(@Body() { email, password }: CreateUserDto, @Session() session: any) {
         let [user] = await this.usersService.find(email);
-        if (!user) return this.httpError(user, NotFoundException, `User not found with an email of ${email}`);
-        user = await this.authService.signIn(user, password);
-        if (!user) return this.httpError(user, BadRequestException, 'OOPS! Password was wrong!👎');
-        return user;
+        if (this.httpError(user, NotFoundException, `User not found with an email of ${email}`)) {
+            user = await this.authService.signIn(user, password);
+            if (this.httpError(user, BadRequestException, 'OOPS! Password was wrong!👎')) {
+                session.userId = user.id;
+                return user;
+            }
+        }
     };
+
+    @Post('/signout')
+    signOut(@Session() session: any) {
+        session.userId = null;
+    }
 
     @Get('/:id')
     async findUser(@Param('id') id: string) {
