@@ -1,6 +1,6 @@
 import {
     Body, Controller, Delete, Get, Param, Patch, Post, Query,
-    NotFoundException, BadRequestException, Session
+    NotFoundException, BadRequestException, Session, UseGuards
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user-dto';
@@ -11,6 +11,7 @@ import { Serialize } from 'src/interceptors/serialize.interceptor';
 import { UserDto } from 'src/users/dto/user.dto';
 import { Class } from 'src/custom.types';
 import { CurrentUser } from './decorators/current-user.decorator';
+import { AuthGuard } from './guards/auth.guard';
 
 
 
@@ -28,9 +29,10 @@ export class UsersController {
         return user ? user : (() => { throw new exception(msg); })();
     };
 
+    @UseGuards(AuthGuard)
     @Get('/retrieve')
     retrieveUp(@CurrentUser() user: User) {
-        return this.httpError(user, NotFoundException, `Session not found!`);
+        return user;
     }
 
     @Post('/signup')
