@@ -10,6 +10,8 @@ import { User } from './user.entity';
 import { Serialize } from 'src/interceptors/serialize.interceptor';
 import { UserDto } from 'src/users/dto/user.dto';
 import { Class } from 'src/custom.types';
+import { CurrentUser } from './decorators/current-user.decorator';
+
 
 
 //pushed our custom interceptor for filtering props on response!
@@ -27,8 +29,7 @@ export class UsersController {
     };
 
     @Get('/retrieve')
-    async retrieveUp(@Session() session: any) {
-        const user = await this.usersService.findOne(session.userId);
+    retrieveUp(@CurrentUser() user: User) {
         return this.httpError(user, NotFoundException, `Session not found!`);
     }
 
