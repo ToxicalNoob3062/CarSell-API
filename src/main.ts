@@ -1,4 +1,4 @@
-const cookieSession = require("cookie-session"); //Because nestJS dont support es-version for this module.
+import cookieSession = require("cookie-session"); //Because nestJS dont support es-version for this module.
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { ValidationPipe } from "@nestjs/common";

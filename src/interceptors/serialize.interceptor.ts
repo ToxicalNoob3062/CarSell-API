@@ -7,6 +7,7 @@ import { Class } from 'src/custom.types';
 export function Serialize(dto: Class) {
     return UseInterceptors(new SerializeInterceptor(dto));
 }
+
 export class SerializeInterceptor implements NestInterceptor {
     constructor(private dto: Class) { }
     intercept(_: ExecutionContext, next: CallHandler): Observable<any> {

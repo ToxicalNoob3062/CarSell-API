@@ -4,13 +4,13 @@ import { UsersService } from "./users.service";
 import { User } from "./user.entity";
 
 describe("AuthService", () => {
-    let service: AuthService, fakeUsersService: Partial<UsersService>, id = 1;
+    let service: AuthService, id = 1;
     const usersCache: User[] = [];
     const mail = 'rahat3062@gmail.com';
     const pass = "robert";
 
     beforeEach(async () => {
-        fakeUsersService = {
+        const fakeUsersService = {
             find: (email: string): Promise<User[]> => {
                 const filteredUser = usersCache.filter(user => user.email === email);
                 return Promise.resolve(filteredUser);
@@ -51,7 +51,7 @@ describe("AuthService", () => {
         await expect(service.signIn(usersCache[0], 'wrong@pass')).resolves.toBeNull();
     });
 
-    it(`It returns a user if correct password id provided!`, async () => {
+    it(`Returns a user if correct password id provided!`, async () => {
         await expect(service.signIn(usersCache[0], pass)).resolves.toBeTruthy();
     });
 });

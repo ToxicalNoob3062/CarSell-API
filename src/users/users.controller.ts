@@ -7,17 +7,18 @@ import { UpdateUserDto } from './dto/update-user-dto';
 import { UsersService } from './users.service';
 import { AuthService } from './auth.service';
 import { User } from './user.entity';
-import { Serialize } from 'src/interceptors/serialize.interceptor';
-import { UserDto } from 'src/users/dto/user.dto';
+import { UserDto } from '../users/dto/user.dto';
 import { Class } from 'src/custom.types';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { AuthGuard } from './guards/auth.guard';
+import { Serialize } from '../../src/interceptors/serialize.interceptor';
 
 
 
 //pushed our custom interceptor for filtering props on response!
-@Serialize(UserDto)
+
 @Controller('/auth')
+@Serialize(UserDto)
 export class UsersController {
     constructor(
         private usersService: UsersService,
@@ -66,8 +67,8 @@ export class UsersController {
     };
 
     @Get()
-    findAllUsers(@Query('email') email: string) {
-        return this.usersService.find(email);
+    async findAllUsers(@Query('email') email: string) {
+        return await this.usersService.find(email);
     };
 
     @Delete('/:id')
