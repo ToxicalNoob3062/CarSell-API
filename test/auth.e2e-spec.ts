@@ -16,10 +16,10 @@ describe('Authentication System', () => {
     });
 
     it('handles a signup request', async () => {
-        const mail = 'phaserCop321@mail.com';
+        const mail = 'phaser3@mail.com';
         return request(app.getHttpServer())
             .post('/auth/signup')
-            .send({ email: mail, password: 'fishyfishy' })
+            .send({ email: mail, password: 'fisheries' })
             .expect(201)
             .then(res => {
                 const { id, email } = res.body;

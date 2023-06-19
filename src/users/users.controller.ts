@@ -7,11 +7,11 @@ import { UpdateUserDto } from './dto/update-user-dto';
 import { UsersService } from './users.service';
 import { AuthService } from './auth.service';
 import { User } from './user.entity';
-import { UserDto } from '../users/dto/user.dto';
 import { Class } from 'src/custom.types';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { AuthGuard } from './guards/auth.guard';
-import { Serialize } from '../../src/interceptors/serialize.interceptor';
+import { UserDto } from '../users/dto/user.dto';
+import { Serialize } from '../interceptors/serialize.interceptor';
 
 
 

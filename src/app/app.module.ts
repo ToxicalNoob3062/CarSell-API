@@ -8,17 +8,28 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../users/user.entity';
 import { Report } from '../reports/report.entity';
 import { APP_PIPE } from '@nestjs/core';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import cookieSession = require('cookie-session'); //Because nestJS dont support es-version for this module.
 
-const OrmModule = TypeOrmModule.forRoot({
-  type: "sqlite",
-  database: `db.sqlite`,
-  entities: [User, Report],
-  synchronize: true,
+const OrmModule = TypeOrmModule.forRootAsync({
+  inject: [ConfigService],
+  useFactory: (config: ConfigService) => {
+    return {
+      type: "sqlite",
+      database: `db/${config.get<string>('DB_NAME')}`,
+      synchronize: true,
+      entities: [User, Report]
+    };
+  }
+});
+
+const EnvModule = ConfigModule.forRoot({
+  isGlobal: true,
+  envFilePath: `env/.env.${process.env.NODE_ENV}`
 });
 
 @Module({
-  imports: [UsersModule, ReportsModule, OrmModule],
+  imports: [UsersModule, ReportsModule, OrmModule, EnvModule],
   controllers: [AppController],
   providers: [AppService, {
     //This is how you set global pipes inside App module instead of bootstrap function!
