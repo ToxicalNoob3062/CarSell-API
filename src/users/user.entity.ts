@@ -1,4 +1,9 @@
-import { Entity, Column, PrimaryGeneratedColumn, AfterInsert, AfterUpdate, AfterRemove } from "typeorm";
+import {
+    Entity, Column, PrimaryGeneratedColumn, AfterInsert, AfterUpdate, AfterRemove,
+    OneToMany
+} from "typeorm";
+
+import { Report } from "src/reports/report.entity";
 
 @Entity()
 export class User {
@@ -10,6 +15,9 @@ export class User {
 
     @Column()
     password: string;
+
+    @OneToMany(() => Report, (report) => report.user)
+    reports: Report[];
 
     //the below methods use typeorm hooks with methods and this will only be executed if we interact with database
     //creating a database instance.

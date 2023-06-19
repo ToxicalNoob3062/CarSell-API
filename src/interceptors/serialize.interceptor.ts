@@ -2,7 +2,7 @@ import { NestInterceptor, ExecutionContext, CallHandler, UseInterceptors } from 
 import { Observable } from 'rxjs';
 import { map } from "rxjs/operators";
 import { plainToClass } from 'class-transformer';
-import { Class } from 'src/custom.types';
+import { Class } from 'src/extras/custom.types';
 
 export function Serialize(dto: Class) {
     return UseInterceptors(new SerializeInterceptor(dto));

@@ -2,16 +2,16 @@ import {
     Body, Controller, Delete, Get, Param, Patch, Post, Query,
     NotFoundException, BadRequestException, Session, UseGuards
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user-dto';
+import { CreateUserDto } from './dtos/create-user.dto';
+import { UpdateUserDto } from './dtos/update-user-dto';
 import { UsersService } from './users.service';
 import { AuthService } from './auth.service';
 import { User } from './user.entity';
-import { Class } from 'src/custom.types';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { AuthGuard } from './guards/auth.guard';
-import { UserDto } from '../users/dto/user.dto';
+import { UserDto } from './dtos/user.dto';
 import { Serialize } from '../interceptors/serialize.interceptor';
+import { httpError } from 'src/extras/utility.functions';
 
 
 
@@ -25,11 +25,6 @@ export class UsersController {
         private authService: AuthService,
     ) { }
 
-    //controller utility modified method
-    httpError(user: User, exception: Class, msg: string) {
-        return user ? user : (() => { throw new exception(msg); })();
-    };
-
     @UseGuards(AuthGuard)
     @Get('/retrieve')
     retrieveUp(@CurrentUser() user: User) {
@@ -40,15 +35,15 @@ export class UsersController {
     async signUp(@Body() { email, password }: CreateUserDto, @Session() session: any) {
         const user = await this.authService.signUp(email, password);
         session.userId = user.id;
-        return this.httpError(user, BadRequestException, 'Email already in use!😔');
+        return httpError(user, BadRequestException, 'Email already in use!😔');
     };
 
     @Post('/signin')
     async signIn(@Body() { email, password }: CreateUserDto, @Session() session: any) {
         let [user] = await this.usersService.find(email);
-        if (this.httpError(user, NotFoundException, `User not found with an email of ${email}`)) {
+        if (httpError(user, NotFoundException, `User not found with an email of ${email}`)) {
             user = await this.authService.signIn(user, password);
-            if (this.httpError(user, BadRequestException, 'OOPS! Password was wrong!👎')) {
+            if (httpError(user, BadRequestException, 'OOPS! Password was wrong!👎')) {
                 session.userId = user.id;
                 return user;
             }
@@ -63,7 +58,7 @@ export class UsersController {
     @Get('/:id')
     async findUser(@Param('id') id: string) {
         const user = await this.usersService.findOne(parseInt(id));
-        return this.httpError(user, NotFoundException, `User not found with an id of ${id}`);
+        return httpError(user, NotFoundException, `User not found with an id of ${id}`);
     };
 
     @Get()
@@ -74,12 +69,12 @@ export class UsersController {
     @Delete('/:id')
     async deleteUser(@Param('id') id: string) {
         const user = await this.usersService.remove(parseInt(id));
-        return this.httpError(user, NotFoundException, `User not found with an id of ${id}`);
+        return httpError(user, NotFoundException, `User not found with an id of ${id}`);
     };
 
     @Patch("/:id")
     async updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
         const user = await this.usersService.update(parseInt(id), body);
-        return this.httpError(user, NotFoundException, `User not found with an id of ${id}`);
+        return httpError(user, NotFoundException, `User not found with an id of ${id}`);
     };
 };
