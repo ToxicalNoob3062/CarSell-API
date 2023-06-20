@@ -8,6 +8,7 @@ import { ReportDto } from './dtos/report.dto';
 import { Serialize } from 'src/interceptors/serialize.interceptor';
 import { ApprovedReportDto } from './dtos/approved-report.dto';
 import { httpError } from 'src/extras/utility.functions';
+import { AdminGuard } from 'src/users/guards/admin.guard';
 
 @Controller('/reports')
 @Serialize(ReportDto)
@@ -22,6 +23,7 @@ export class ReportsController {
         return this.reportsService.create(body, user);
     }
 
+    @UseGuards(AdminGuard)
     @Patch('/:id')
     async approveReport(@Param('id') id: string, @Body() { approved }: ApprovedReportDto) {
         const report = await this.reportsService.changeApproval(id, approved);
