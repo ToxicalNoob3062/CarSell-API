@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-
+import { scrypt } from 'src/extras/utility.functions';
 
 @Injectable()
 export class UsersService {
@@ -14,23 +14,24 @@ export class UsersService {
         const userInstance = this.repo.create({ email, password });
         return await this.repo.save(userInstance);
     }
-    async findOne(id: number) {
+    async findById(id: number) {
         if (!id) return null;
         return await this.repo.findOneBy({ id });
     }
-    async find(email: string) {
-        return await this.repo.find({ where: { email } });
+    async findByMail(email: string) {
+        return await this.repo.findOneBy({ email });
     }
-    async update(id: number, attrs: Partial<User>) {
-        const user = await this.findOne(id);
-        if (!user) return user;
+    async update(user: User, attrs: Partial<User>) {
+        if (attrs.password) {
+            const [salt] = user.password.split('.');
+            const hash = (await scrypt(attrs.password, salt, 32)) as Buffer;
+            attrs.password = `${salt}.${hash.toString('hex')}`;
+        }
         Object.assign(user, attrs);
         return await this.repo.save(user);
     }
-    async remove(id: number) {
-        const user = await this.findOne(id);
-        if (!user) return null;
-        if (user.reports.length) return `User with id:${id} has existing reports!`;
+    async remove(user: User) {
+        if (user.reports.length) return null;
         return await this.repo.remove(user);
     }
 }

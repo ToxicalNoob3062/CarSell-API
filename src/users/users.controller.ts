@@ -41,7 +41,7 @@ export class UsersController {
 
     @Post('/signin')
     async signIn(@Body() { email, password }: CreateUserDto, @Session() session: any) {
-        let [user] = await this.usersService.find(email);
+        let user = await this.usersService.findByMail(email);
         if (httpError(user, NotFoundException, `User not found with an email of ${email}`)) {
             user = await this.authService.signIn(user, password);
             if (httpError(user, BadRequestException, 'OOPS! Password was wrong!👎')) {
@@ -58,24 +58,25 @@ export class UsersController {
 
     @Get('/:id')
     async findUser(@Param('id') id: string) {
-        const user = await this.usersService.findOne(parseInt(id));
+        const user = await this.usersService.findById(parseInt(id));
         return httpError(user, NotFoundException, `User not found with an id of ${id}`);
     };
 
     @Get()
-    async findAllUsers(@Query('email') email: string) {
-        return await this.usersService.find(email);
+    async findUserByMail(@Query('email') email: string) {
+        return await this.usersService.findByMail(email);
     };
 
-    @Delete('/:id')
-    async deleteUser(@Param('id') id: string) {
-        const user = await this.usersService.remove(parseInt(id));
-        return httpError(user, NotFoundException, `User not found with an id of ${id}`);
+    @UseGuards(AuthGuard)
+    @Delete()
+    async deleteUser(@CurrentUser() user: User) {
+        user = await this.usersService.remove(user);
+        return httpError(user, BadRequestException, `Clear Published Reports Before Deleting Account!`);
     };
 
-    @Patch("/:id")
-    async updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
-        const user = await this.usersService.update(parseInt(id), body);
-        return httpError(user, NotFoundException, `User not found with an id of ${id}`);
+    @UseGuards(AuthGuard)
+    @Patch()
+    async updateUser(@CurrentUser() user: User, @Body() body: UpdateUserDto) {
+        return await this.usersService.update(user, body);
     };
 };
