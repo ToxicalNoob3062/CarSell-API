@@ -10,9 +10,12 @@ export class UsersService {
         @InjectRepository(User)
         private repo: Repository<User>,
     ) { }
+    async saveUser(user: User) {
+        return await this.repo.save(user);
+    }
     async create(email: string, password: string) {
         const userInstance = this.repo.create({ email, password });
-        return await this.repo.save(userInstance);
+        return this.saveUser(userInstance);
     }
     async findById(id: number) {
         if (!id) return null;
@@ -28,7 +31,7 @@ export class UsersService {
             attrs.password = `${salt}.${hash.toString('hex')}`;
         }
         Object.assign(user, attrs);
-        return await this.repo.save(user);
+        return this.saveUser(user);
     }
     async remove(user: User) {
         if (user.reports.length) return null;

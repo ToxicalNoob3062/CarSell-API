@@ -12,22 +12,30 @@ export class ReportsService {
         @InjectRepository(Report)
         private repo: Repository<Report>
     ) { }
-    create(reportDto: CreateReportDto, user: User) {
+    async create(reportDto: CreateReportDto, user: User) {
         const report = this.repo.create(reportDto);
         report.user = user;
-        return this.repo.save(report);
+        return await this.saveReport(report);
     }
     async changeApproval(id: string, approved: boolean) {
         const report = await this.findReport(id);
         if (!report) return null;
         report.approved = approved;
-        return this.repo.save(report);
+        return await this.saveReport(report);
     }
 
     async findReport(id: string) {
         const report = await this.repo.findOne({ where: { id: parseInt(id) }, relations: ['user'] });
         if (!report) return null;
         return report;
+    }
+
+    async deleteReport(report: Report) {
+        return await this.repo.remove(report);
+    }
+
+    async saveReport(report: Report) {
+        return await this.repo.save(report);
     }
 
     createEstimate({ make, model, lng, lat, year, mileage }: GetEstimateDto) {

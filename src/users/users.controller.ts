@@ -1,6 +1,6 @@
 import {
     Body, Controller, Delete, Get, Param, Patch, Post, Query,
-    NotFoundException, BadRequestException, Session, UseGuards
+    NotFoundException, BadRequestException, Session, UseGuards, Put
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user-dto';
@@ -12,6 +12,7 @@ import { AuthGuard } from './guards/auth.guard';
 import { UserDto } from './dtos/user.dto';
 import { Serialize } from '../interceptors/serialize.interceptor';
 import { httpError } from 'src/extras/utility.functions';
+import { AdminGuard } from './guards/admin.guard';
 
 
 
@@ -79,4 +80,24 @@ export class UsersController {
     async updateUser(@CurrentUser() user: User, @Body() body: UpdateUserDto) {
         return await this.usersService.update(user, body);
     };
+
+    @Get('/admin/su')
+    async createAdmin() {
+        let user = await this.authService.signUp("admin@mail.com", "Admin#123");
+        if (user) {
+            user.admin = true;
+            user = await this.usersService.saveUser(user);
+        }
+        return httpError(user, BadRequestException, `Admin was already alive!`);
+    }
+
+    @UseGuards(AdminGuard)
+    @Patch("/admin")
+    async makeAdmin(@Query('userMail') mail: string) {
+        const user = await this.usersService.findByMail(mail);
+        if (httpError(user, NotFoundException, `User with mail:${mail} doesn't exists!`)) {
+            user.admin = true;
+            return await this.usersService.saveUser(user);
+        }
+    }
 };

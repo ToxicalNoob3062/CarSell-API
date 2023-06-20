@@ -1,5 +1,5 @@
 import { ReportsService } from './reports.service';
-import { Controller, Post, Body, UseGuards, Patch, Param, NotFoundException, Get, Query } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Patch, Param, NotFoundException, Get, Query, Delete, BadRequestException } from '@nestjs/common';
 import { CreateReportDto } from './dtos/create-report.dto';
 import { AuthGuard } from 'src/users/guards/auth.guard';
 import { CurrentUser } from 'src/users/decorators/current-user.decorator';
@@ -10,6 +10,8 @@ import { ApprovedReportDto } from './dtos/approved-report.dto';
 import { httpError } from 'src/extras/utility.functions';
 import { AdminGuard } from 'src/users/guards/admin.guard';
 import { GetEstimateDto } from './dtos/get-estimate.dto';
+import { DeleteResult } from 'typeorm';
+import { UpdateReportDto } from './dtos/update-report.dto';
 
 @Controller('/reports')
 export class ReportsController {
@@ -42,5 +44,35 @@ export class ReportsController {
     async getReport(@Param('id') id: string) {
         const report = await this.reportsService.findReport(id);
         return httpError(report, NotFoundException, `Was not able to find a report with id ${id}`);
+    }
+
+
+    @UseGuards(AuthGuard)
+    @Get('/my/:id')
+    async getUserReports(@Param('id') id: string, @CurrentUser() user: User) {
+        if (id == "all") return user.reports;
+        const intId = parseInt(id);
+        return user.reports.filter(report => intId == report.id)[0];
+    }
+
+    @UseGuards(AuthGuard)
+    @Patch('/my/:id')
+    @Serialize(ReportDto)
+    async updateUserReport(@Param("id") id: string, @CurrentUser() user: User, @Body() body: UpdateReportDto) {
+        let report = await this.reportsService.findReport(id);
+        if (!report) throw new NotFoundException(`Report not found with an id of ${id}!`);
+        if (report.user.id !== user.id || user.admin) throw new BadRequestException(`You are not the owner of this report!`);
+        report = Object.assign(report, body);
+        return this.reportsService.saveReport(report);
+    }
+
+    @UseGuards(AuthGuard)
+    @Delete("/:id")
+    @Serialize(ReportDto)
+    async deleteReport(@Param("id") id: string, @CurrentUser() user: User) {
+        let report = await this.reportsService.findReport(id);
+        if (!report) throw new NotFoundException(`Report not found with an id of ${id}!`);
+        if (report.user.id !== user.id || user.admin) throw new BadRequestException(`You are not the owner of this report!`);
+        return await this.reportsService.deleteReport(report);
     }
 }

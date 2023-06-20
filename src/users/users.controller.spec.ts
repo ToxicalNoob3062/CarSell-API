@@ -20,7 +20,7 @@ describe('UsersController', () => {
       }
     };
     fakeUsersService = {
-      find: (email: string) => Promise.resolve([{ id: 7, email, password: 'id@session' } as User]),
+      findByMail: (email: string) => Promise.resolve([{ id: 7, email, password: 'id@session' } as User]),
       findOne: (id: number) => Promise.resolve({ id, email: 'robo123@gmail.com', password: '123456' } as User)
     };
 
