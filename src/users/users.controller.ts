@@ -33,9 +33,10 @@ export class UsersController {
 
     @Post('/signup')
     async signUp(@Body() { email, password }: CreateUserDto, @Session() session: any) {
-        const user = await this.authService.signUp(email, password);
+        let user = await this.authService.signUp(email, password);
+        user = httpError(user, BadRequestException, 'Email already in use!😔');
         session.userId = user.id;
-        return httpError(user, BadRequestException, 'Email already in use!😔');
+        return user;
     };
 
     @Post('/signin')

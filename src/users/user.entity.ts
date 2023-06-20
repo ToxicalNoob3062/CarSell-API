@@ -16,10 +16,10 @@ export class User {
     @Column()
     password: string;
 
-    @Column({ default: true })
+    @Column({ default: false })
     admin: boolean;
 
-    @OneToMany(() => Report, (report) => report.user)
+    @OneToMany(() => Report, (report) => report.user, { eager: true })
     reports: Report[];
 
     //the below methods use typeorm hooks with methods and this will only be executed if we interact with database
