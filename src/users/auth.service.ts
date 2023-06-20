@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './user.entity';
-import { scrypt } from 'src/extras/utility.functions';
+import { scrypt } from '../extras/utility.functions';
 import { randomBytes } from 'crypto';
 
 

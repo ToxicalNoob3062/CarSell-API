@@ -1,16 +1,15 @@
 import { ReportsService } from './reports.service';
 import { Controller, Post, Body, UseGuards, Patch, Param, NotFoundException, Get, Query, Delete, BadRequestException } from '@nestjs/common';
 import { CreateReportDto } from './dtos/create-report.dto';
-import { AuthGuard } from 'src/users/guards/auth.guard';
-import { CurrentUser } from 'src/users/decorators/current-user.decorator';
-import { User } from 'src/users/user.entity';
+import { AuthGuard } from '../users/guards/auth.guard';
+import { CurrentUser } from '../users/decorators/current-user.decorator';
+import { User } from '../users/user.entity';
 import { ReportDto } from './dtos/report.dto';
-import { Serialize } from 'src/interceptors/serialize.interceptor';
+import { Serialize } from '../interceptors/serialize.interceptor';
 import { ApprovedReportDto } from './dtos/approved-report.dto';
-import { httpError } from 'src/extras/utility.functions';
-import { AdminGuard } from 'src/users/guards/admin.guard';
+import { httpError } from '../extras/utility.functions';
+import { AdminGuard } from '../users/guards/admin.guard';
 import { GetEstimateDto } from './dtos/get-estimate.dto';
-import { DeleteResult } from 'typeorm';
 import { UpdateReportDto } from './dtos/update-report.dto';
 
 @Controller('/reports')

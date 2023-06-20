@@ -20,8 +20,8 @@ describe('UsersController', () => {
       }
     };
     fakeUsersService = {
-      findByMail: (email: string) => Promise.resolve([{ id: 7, email, password: 'id@session' } as User]),
-      findOne: (id: number) => Promise.resolve({ id, email: 'robo123@gmail.com', password: '123456' } as User)
+      findByMail: (email: string) => Promise.resolve({ id: 7, email, password: 'id@session' } as User),
+      findById: (id: number) => Promise.resolve({ id, email: 'robo123@gmail.com', password: '123456' } as User)
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -41,9 +41,9 @@ describe('UsersController', () => {
 
   it('try to get all users with given mail.', async () => {
     const mail = 'rahat3062@mail.com';
-    const users = await controller.findAllUsers(mail);
-    expect(users.length).toEqual(1);
-    expect(users[0].email).toEqual(mail);
+    const user = await controller.findUserByMail(mail);
+    expect(user).toBeDefined();
+    expect(user.email).toEqual(mail);
   });
 
   it('find user returns a single user with given id', async () => {
@@ -51,7 +51,7 @@ describe('UsersController', () => {
   });
 
   it('find user throws error when user is not found', async () => {
-    fakeUsersService.findOne = () => Promise.resolve(null);
+    fakeUsersService.findById = () => Promise.resolve(null);
     await expect(controller.findUser('1')).rejects.toThrow(NotFoundException);
   });
   it('Authenticating in updates session and returns user', async () => {

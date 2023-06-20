@@ -11,9 +11,9 @@ describe("AuthService", () => {
 
     beforeEach(async () => {
         const fakeUsersService = {
-            find: (email: string): Promise<User[]> => {
+            findByMail: (email: string): Promise<User> => {
                 const filteredUser = usersCache.filter(user => user.email === email);
-                return Promise.resolve(filteredUser);
+                return Promise.resolve(filteredUser[0]);
             },
             create: (email: string, password: string): Promise<User> => {
                 const user = { id, email, password } as User;

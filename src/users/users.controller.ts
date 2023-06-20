@@ -11,7 +11,7 @@ import { CurrentUser } from './decorators/current-user.decorator';
 import { AuthGuard } from './guards/auth.guard';
 import { UserDto } from './dtos/user.dto';
 import { Serialize } from '../interceptors/serialize.interceptor';
-import { httpError } from 'src/extras/utility.functions';
+import { httpError } from '../extras/utility.functions';
 import { AdminGuard } from './guards/admin.guard';
 
 
