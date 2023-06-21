@@ -38,10 +38,13 @@ const EnvModule = ConfigModule.forRoot({
   }],
 })
 export class AppModule {
+  constructor(
+    private configService: ConfigService,
+  ) { }
   //setting up middle ware globally inside app module instead of bootstrap function
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(cookieSession({
-      keys: ["ola123"]
+      keys: [this.configService.get<string>("COOKIE_KEY")]
     })).forRoutes('*');
   };
 };
