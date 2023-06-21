@@ -65,7 +65,8 @@ export class UsersController {
 
     @Get()
     async findUserByMail(@Query('email') email: string) {
-        return await this.usersService.findByMail(email);
+        const user = await this.usersService.findByMail(email);
+        return httpError(user, NotFoundException, `User not found with an email of ${email}`);
     };
 
     @UseGuards(AuthGuard)
