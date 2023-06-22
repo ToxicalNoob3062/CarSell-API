@@ -5,22 +5,13 @@ import { UsersModule } from '../users/users.module';
 import { ReportsModule } from '../reports/reports.module';
 //my imports
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../users/user.entity';
-import { Report } from '../reports/report.entity';
 import { APP_PIPE } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmConfigService } from '../config/typeorm.config';
 import cookieSession = require('cookie-session'); //Because nestJS dont support es-version for this module.
 
 const OrmModule = TypeOrmModule.forRootAsync({
-  inject: [ConfigService],
-  useFactory: (config: ConfigService) => {
-    return {
-      type: "sqlite",
-      database: `db/${config.get<string>('DB_NAME')}`,
-      synchronize: true,
-      entities: [User, Report]
-    };
-  }
+  useClass: TypeOrmConfigService
 });
 
 const EnvModule = ConfigModule.forRoot({
