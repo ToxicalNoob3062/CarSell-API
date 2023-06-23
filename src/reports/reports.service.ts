@@ -38,18 +38,22 @@ export class ReportsService {
         return await this.repo.save(report);
     }
 
-    createEstimate({ make, model, lng, lat, year, mileage }: GetEstimateDto) {
-        return this.repo.createQueryBuilder()
-            .select('AVG(price)', 'price')
-            .where('make = :make', { make })
-            .andWhere("model = :model", { model })
-            .andWhere("lng - :lng BETWEEN -5 AND 5", { lng })
-            .andWhere("lat - :lat BETWEEN -5 AND 5", { lat })
-            .andWhere("year - :year BETWEEN -3 AND 3", { year })
-            .andWhere("approved IS TRUE")
-            .orderBy("ABS(mileage -:mileage)", "DESC")
+    async createEstimate({ make, model, lng, lat, year, mileage }: GetEstimateDto) {
+        return await this.repo.createQueryBuilder('report')
+            .select('AVG(report.price)', 'price')
+            .addSelect('report.mileage', 'mileage')
+            .where('report.make = :make', { make })
+            .andWhere('report.model = :model', { model })
+            .andWhere('report.lng BETWEEN :lngMin AND :lngMax', { lngMin: lng - 5, lngMax: lng + 5 })
+            .andWhere('report.lat BETWEEN :latMin AND :latMax', { latMin: lat - 5, latMax: lat + 5 })
+            .andWhere('report.year BETWEEN :yearMin AND :yearMax', { yearMin: year - 3, yearMax: year + 3 })
+            .andWhere('report.approved IS TRUE')
+            .addGroupBy('report.mileage')
+            .orderBy('CASE WHEN report.mileage >= :mileage THEN report.mileage - :mileage ELSE :mileage - report.mileage END', 'DESC')
             .setParameters({ mileage })
             .limit(3)
-            .getRawOne();
+            .getRawOne()
+            .then(result => (result && { price: parseInt(result.price) }) || 0);
+
     }
 }

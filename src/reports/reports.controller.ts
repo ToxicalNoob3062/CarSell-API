@@ -19,8 +19,9 @@ export class ReportsController {
     ) { }
 
     @Get()
-    getEstimate(@Query() query: GetEstimateDto) {
-        return this.reportsService.createEstimate(query);
+    async getEstimate(@Query() query: GetEstimateDto) {
+        const res = await this.reportsService.createEstimate(query);
+        return httpError(res, BadRequestException, 'Data shortage!!!');
     }
 
     @UseGuards(AuthGuard)
@@ -60,7 +61,7 @@ export class ReportsController {
     async updateUserReport(@Param("id") id: string, @CurrentUser() user: User, @Body() body: UpdateReportDto) {
         let report = await this.reportsService.findReport(id);
         if (!report) throw new NotFoundException(`Report not found with an id of ${id}!`);
-        if (report.user.id !== user.id || user.admin) throw new BadRequestException(`You are not the owner of this report!`);
+        if (report.user.id !== user.id && !user.admin) throw new BadRequestException(`You are not the owner of this report!`);
         report = Object.assign(report, body);
         return this.reportsService.saveReport(report);
     }
@@ -71,7 +72,7 @@ export class ReportsController {
     async deleteReport(@Param("id") id: string, @CurrentUser() user: User) {
         let report = await this.reportsService.findReport(id);
         if (!report) throw new NotFoundException(`Report not found with an id of ${id}!`);
-        if (report.user.id !== user.id || user.admin) throw new BadRequestException(`You are not the owner of this report!`);
+        if (report.user.id !== user.id && !user.admin) throw new BadRequestException(`You are not the owner of this report!`);
         return await this.reportsService.deleteReport(report);
     }
 }
