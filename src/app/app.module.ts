@@ -7,7 +7,7 @@ import { ReportsModule } from '../reports/reports.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_PIPE } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmConfigService } from '../config/typeorm.config';
+import { TypeOrmConfigService } from '../orm-config/typeorm.config';
 import cookieSession = require('cookie-session'); //Because nestJS dont support es-version for this module.
 
 const OrmModule = TypeOrmModule.forRootAsync({
@@ -16,8 +16,10 @@ const OrmModule = TypeOrmModule.forRootAsync({
 
 const EnvModule = ConfigModule.forRoot({
   isGlobal: true,
-  envFilePath: `env/.env.${process.env.NODE_ENV}`
+  envFilePath: `.env`
 });
+
+
 
 @Module({
   imports: [UsersModule, ReportsModule, OrmModule, EnvModule],
@@ -28,14 +30,23 @@ const EnvModule = ConfigModule.forRoot({
     useValue: new ValidationPipe({ whitelist: true })
   }],
 })
+
+
 export class AppModule {
   constructor(
     private configService: ConfigService,
   ) { }
+  convertEnvForProd(key: string) {
+    const env = process.env.NODE_ENV;
+    if (env === "production") {
+      return process.env[key];
+    }
+    return this.configService.get<string>(key);
+  }
   //setting up middle ware globally inside app module instead of bootstrap function
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(cookieSession({
-      keys: [this.configService.get<string>("COOKIE_KEY")]
+      keys: [this.convertEnvForProd('COOKIE_KEY')]
     })).forRoutes('*');
   };
 };
