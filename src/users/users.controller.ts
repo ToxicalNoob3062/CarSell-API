@@ -55,6 +55,7 @@ export class UsersController {
     @Post('/signout')
     signOut(@Session() session: any) {
         session.userId = null;
+        return 'Signed Out Successfully ⚡';
     }
 
     @Get('/:id')
