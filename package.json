@@ -21,7 +21,7 @@
     "typeorm": "cross-env NODE_ENV=development typeorm-ts-node-commonjs -d src/orm-config/data-source.ts"
   },
   "dependencies": {
-    "@nestjs/common": "^9.0.0",
+    "@nestjs/common": "^11.0.16",
     "@nestjs/config": "^3.0.0",
     "@nestjs/core": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
